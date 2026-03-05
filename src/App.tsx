@@ -59,12 +59,28 @@ function BingoBoard({ boardName, allVillagers }: { boardName: string, allVillage
     setHasBingo(false) // Reset bingo status
   }
 
-  // Generate the board when villagers data is loaded
+  // Load saved game or generate the board when villagers data is loaded
   useEffect(() => {
     if (allVillagers.length > 0) {
-      generateBoard()
+      const savedBoard = localStorage.getItem(`bingo_board_${boardName}`);
+      const savedStamps = localStorage.getItem(`bingo_stamps_${boardName}`);
+
+      if (savedBoard && savedStamps) {
+        setBoard(JSON.parse(savedBoard));
+        setStampedCells(JSON.parse(savedStamps));
+      } else {
+        generateBoard();
+      }
     }
-  }, [allVillagers])
+  }, [allVillagers, boardName]);
+
+  // Persist game state to localStorage whenever board or stamps change
+  useEffect(() => {
+    if (board.length > 0) {
+      localStorage.setItem(`bingo_board_${boardName}`, JSON.stringify(board));
+      localStorage.setItem(`bingo_stamps_${boardName}`, JSON.stringify(stampedCells));
+    }
+  }, [board, stampedCells, boardName]);
 
   // Check for Bingo whenever stampedCells change
   useEffect(() => {
@@ -108,7 +124,11 @@ function BingoBoard({ boardName, allVillagers }: { boardName: string, allVillage
       <div className="flex justify-between items-center mb-3 md:mb-4 px-1">
         <h2 className="text-lg md:text-xl font-bold text-[#8A7160]">{boardName}</h2>
         <button 
-          onClick={generateBoard}
+          onClick={() => {
+            localStorage.removeItem(`bingo_board_${boardName}`);
+            localStorage.removeItem(`bingo_stamps_${boardName}`);
+            generateBoard();
+          }}
           className="px-3 py-1 bg-[#F4E3D3] text-[#795B46] text-[10px] md:text-xs font-bold rounded-full shadow-sm hover:bg-[#EBD5C1] transition-colors active:scale-95"
         >
           Reroll
