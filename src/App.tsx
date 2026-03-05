@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import confetti from 'canvas-confetti'
 
 type Villager = {
   id: string
@@ -6,11 +7,39 @@ type Villager = {
   image: string
 }
 
+// Winning patterns for a 5x5 grid
+const WINNING_PATTERNS = [
+  // Rows
+  [0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24],
+  // Columns
+  [0, 5, 10, 15, 20], [1, 6, 11, 16, 21], [2, 7, 12, 17, 22], [3, 8, 13, 18, 23], [4, 9, 14, 19, 24],
+  // Diagonals
+  [0, 6, 12, 18, 24], [4, 8, 12, 16, 20]
+];
+
 // Reusable BingoBoard Component
 function BingoBoard({ boardName, allVillagers }: { boardName: string, allVillagers: Villager[] }) {
   // State Management
   const [board, setBoard] = useState<Villager[]>([])
   const [stampedCells, setStampedCells] = useState<number[]>([]) // Store index of stamped cells
+  const [hasBingo, setHasBingo] = useState(false) // Track if this board has won
+
+  // Play bingo success sound
+  const playBingoSound = () => {
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3');
+    audio.volume = 0.5;
+    audio.play();
+  };
+
+  // Trigger confetti explosion
+  const fireConfetti = () => {
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#795B46', '#F4E3D3', '#D0EBFF', '#FFD700']
+    });
+  };
 
   // Generate a random Bingo board
   const generateBoard = () => {
@@ -27,6 +56,7 @@ function BingoBoard({ boardName, allVillagers }: { boardName: string, allVillage
 
     setBoard(selected)
     setStampedCells([12]) // Auto-stamp the free space!
+    setHasBingo(false) // Reset bingo status
   }
 
   // Generate the board when villagers data is loaded
@@ -35,6 +65,22 @@ function BingoBoard({ boardName, allVillagers }: { boardName: string, allVillage
       generateBoard()
     }
   }, [allVillagers])
+
+  // Check for Bingo whenever stampedCells change
+  useEffect(() => {
+    const isWinner = WINNING_PATTERNS.some(pattern => 
+      pattern.every(index => stampedCells.includes(index))
+    );
+
+    // Trigger celebration only on new win
+    if (isWinner && !hasBingo) {
+      setHasBingo(true);
+      fireConfetti();
+      playBingoSound();
+    } else if (!isWinner) {
+      setHasBingo(false);
+    }
+  }, [stampedCells]);
 
   // Toggle stamp logic
   const toggleStamp = (index: number) => {
@@ -49,8 +95,15 @@ function BingoBoard({ boardName, allVillagers }: { boardName: string, allVillage
 
   return (
     // Responsive container
-    <div className="bg-white p-2 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border-4 border-[#F4E3D3] w-full max-w-sm mx-auto">
+    <div className={`relative bg-white p-2 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border-4 transition-all duration-500 w-full max-w-sm mx-auto ${hasBingo ? 'border-orange-400 ring-4 ring-orange-100' : 'border-[#F4E3D3]'}`}>
       
+      {/* Bingo Badge Overlay */}
+      {hasBingo && (
+        <div className="absolute -top-4 -right-2 bg-orange-500 text-white px-4 py-1 rounded-full font-black text-lg shadow-lg z-10 animate-bounce">
+          BINGO!
+        </div>
+      )}
+
       {/* Board Header */}
       <div className="flex justify-between items-center mb-3 md:mb-4 px-1">
         <h2 className="text-lg md:text-xl font-bold text-[#8A7160]">{boardName}</h2>
