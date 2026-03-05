@@ -145,19 +145,20 @@ function BingoBoard({ boardName, allVillagers }: { boardName: string, allVillage
               key={`${villager.id}-${index}`}
               onClick={() => toggleStamp(index)}
               // Forced aspect-square and w-full to ensure identical sizing
+              // Updated stamped colors to Warm Peach / Sand theme
               className={`relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-xl border-2 transition-all duration-300 w-full aspect-square overflow-hidden ${
                 isStamped 
-                  ? 'bg-[#E8F3E8] border-[#A3C9A8] transform scale-95 shadow-inner' 
+                  ? 'bg-[#FFF4E0] border-[#EBD5C1] transform scale-95 shadow-inner' 
                   : 'bg-white border-[#F0E6DD] hover:border-[#D5C2B3] hover:shadow-md'
               }`}
             >
               {/* Villager Image */}
-              <div className={`w-[75%] aspect-square rounded-full overflow-hidden mb-0.5 md:mb-1 transition-opacity bg-[#FFF9F0] border border-[#F4E3D3]/50 ${isStamped && index !== 12 ? 'opacity-40' : 'opacity-100'}`}>
+              <div className={`w-[75%] aspect-square rounded-full overflow-hidden mb-0.5 md:mb-1 transition-opacity bg-[#D0EBFF] border border-[#B0E0FF] ${isStamped && index !== 12 ? 'opacity-40' : 'opacity-100'}`}>
                 <img src={villager.image} alt={villager.name} className="w-full h-full object-cover" />
               </div>
 
               {/* Villager Name */}
-              <span className={`text-[7px] md:text-[9px] font-bold text-center leading-tight w-full truncate px-0.5 ${isStamped ? 'text-[#7B9E80]' : 'text-[#8A7160]'}`}>
+              <span className={`text-[7px] md:text-[9px] font-bold text-center leading-tight w-full truncate px-0.5 ${isStamped ? 'text-[#A2846E]' : 'text-[#8A7160]'}`}>
                 {villager.name}
               </span>
 
