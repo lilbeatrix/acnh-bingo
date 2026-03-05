@@ -40,7 +40,8 @@ const VILLAGER_POOL: Villager[] = [
   { id: '30', name: 'Roald', image: 'https://ui-avatars.com/api/?name=Roald&background=BFDBFE&color=1E3A8A&bold=true' },
 ]
 
-export default function App() {
+// Reusable BingoBoard Component
+function BingoBoard({ boardName }: { boardName: string }) {
   // State Management
   const [board, setBoard] = useState<Villager[]>([])
   const [stampedCells, setStampedCells] = useState<number[]>([]) // Store index of stamped cells
@@ -76,71 +77,82 @@ export default function App() {
   }
 
   return (
+    // Responsive container 
+    <div className="bg-white p-2 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border-4 border-[#F4E3D3] w-full max-w-sm mx-auto">
+      
+      {/* Board Header */}
+      <div className="flex justify-between items-center mb-3 md:mb-4 px-1">
+        <h2 className="text-lg md:text-xl font-bold text-[#8A7160]">{boardName}</h2>
+        <button 
+          onClick={generateBoard}
+          className="px-3 py-1 bg-[#F4E3D3] text-[#795B46] text-[10px] md:text-xs font-bold rounded-full shadow-sm hover:bg-[#EBD5C1] transition-colors active:scale-95"
+        >
+          Reroll
+        </button>
+      </div>
+
+      {/* The 5x5 Grid */}
+      <div className="grid grid-cols-5 gap-1 md:gap-2">
+        {board.map((villager, index) => {
+          const isStamped = stampedCells.includes(index)
+
+          return (
+            <button
+              key={`${villager.id}-${index}`}
+              onClick={() => toggleStamp(index)}
+              className={`relative flex flex-col items-center justify-center p-0.5 md:p-2 rounded-lg md:rounded-xl border-2 transition-all duration-300 aspect-square ${
+                isStamped 
+                  ? 'bg-[#E8F3E8] border-[#A3C9A8] transform scale-95 shadow-inner' 
+                  : 'bg-white border-[#F0E6DD] hover:border-[#D5C2B3] hover:shadow-md'
+              }`}
+            >
+              {/* Villager Image */}
+              <div className={`w-full max-w-[35px] md:max-w-[48px] aspect-square rounded-full overflow-hidden mb-0.5 md:mb-1 transition-opacity ${isStamped && index !== 12 ? 'opacity-40' : 'opacity-100'}`}>
+                <img src={villager.image} alt={villager.name} className="w-full h-full object-cover" />
+              </div>
+
+              {/* Villager Name */}
+              <span className={`text-[7px] md:text-[10px] font-bold text-center leading-[1.1] w-full break-words ${isStamped ? 'text-[#7B9E80]' : 'text-[#8A7160]'}`}>
+                {villager.name}
+              </span>
+
+              {/* Stamp Mark */}
+              {isStamped && index !== 12 && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span className="text-xl md:text-4xl text-red-500 opacity-80 transform rotate-12 drop-shadow-md">
+                    🐾
+                  </span>
+                </div>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
     // Light cream background
-    <div className="min-h-screen bg-[#FFF9F0] flex flex-col items-center justify-center p-4 md:p-6 font-sans">
+    <div className="min-h-screen bg-[#FFF9F0] flex flex-col items-center py-8 px-4 font-sans">
       
       {/* Game Header Section */}
-      <div className="text-center mb-6">
-        <h1 className="text-3xl md:text-5xl font-extrabold text-[#795B46] mb-2 md:mb-3 tracking-tight">
-          ✈️ Villager Bingo 🏝️
+      <div className="text-center mb-8">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-[#795B46] mb-3 tracking-tight">
+          ✈️ Villager Hunting Bingo 🏝️
         </h1>
-        <p className="text-[#A2846E] text-sm md:text-lg font-medium">
-          Find them on mystery islands!
+        <p className="text-[#A2846E] text-lg font-medium">
+          Ready your Nook Miles Tickets!
         </p>
       </div>
 
-      {/* Bingo Board Container */}
-      <div className="bg-white p-3 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border-4 border-[#F4E3D3] w-full max-w-3xl">
-        
-        {/* The 5x5 Grid */}
-        <div className="grid grid-cols-5 gap-2 md:gap-3">
-          {board.map((villager, index) => {
-            const isStamped = stampedCells.includes(index)
-
-            return (
-              <button
-                key={`${villager.id}-${index}`}
-                onClick={() => toggleStamp(index)}
-                className={`relative flex flex-col items-center justify-center p-1 md:p-2 rounded-xl border-2 transition-all duration-300 aspect-square ${
-                  isStamped 
-                    ? 'bg-[#E8F3E8] border-[#A3C9A8] transform md:scale-95 shadow-inner' 
-                    : 'bg-white border-[#F0E6DD] hover:border-[#D5C2B3] hover:shadow-md'
-                }`}
-              >
-                {/* Villager Image */}
-                <div className={`w-8 h-8 md:w-16 md:h-16 rounded-full overflow-hidden mb-1 transition-opacity ${isStamped && index !== 12 ? 'opacity-40' : 'opacity-100'}`}>
-                  <img src={villager.image} alt={villager.name} className="w-full h-full object-cover" />
-                </div>
-
-                {/* Villager Name */}
-                <span className={`text-[9px] md:text-sm font-bold text-center leading-tight ${isStamped ? 'text-[#7B9E80]' : 'text-[#8A7160]'}`}>
-                  {villager.name}
-                </span>
-
-                {/* Stamp Mark */}
-                {isStamped && index !== 12 && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span className="text-3xl md:text-6xl text-red-500 opacity-80 transform rotate-12 drop-shadow-md">
-                      🐾
-                    </span>
-                  </div>
-                )}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Controls */}
-        <div className="mt-6 md:mt-8 flex justify-center">
-          <button 
-            onClick={generateBoard}
-            className="px-6 py-3 md:px-8 bg-[#795B46] text-white font-bold rounded-full shadow-md hover:bg-[#634937] transition-colors active:scale-95 flex items-center gap-2 text-sm md:text-base"
-          >
-            Get New Board
-          </button>
-        </div>
-
+      {/* Bingo Cards Container (2 Cards for local player) */}
+      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+        <BingoBoard boardName="Card 1" />
+        <BingoBoard boardName="Card 2" />
       </div>
+
     </div>
   )
 }
